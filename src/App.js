@@ -1,6 +1,4 @@
 import './App.css'
-import Toggle from './Components/Toggle';
-import Clock from './Components/Clock';
 import FiltrableProductTable from './Components/FilterableProductTable';
 import {products} from './products';
 
