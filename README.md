@@ -1,70 +1,149 @@
-# Getting Started with Create React App
+## Composición
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Una buena estrategia al crear componentes es que sean pequeños y re-utilizables. Nuestros componentes pueden contener otros componentes más pequeños por ejemplo:
 
-## Available Scripts
+![Untitled](Introduccio%CC%81n%20a%20React%2030e6507662ce4d67be168095134ca151/Untitled%202.png)
 
-In the project directory, you can run:
+Tabla de productos con posibilidad de filtrar por nombre
 
-### `yarn start`
+Para diseñar este componente en React lo dividimos en sub-componentes:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- App
+    - H1
+    - FiltrableProductTable
+        - SearchBar
+        - ProductTable
+            - Product
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+El código completo de esta aplicación está en el siguiente repositorio de GitHub.
 
-### `yarn test`
+[GitHub - cmo7/ejemplo-tabla](https://github.com/cmo7/ejemplo-tabla)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Componente FilterableProductTable
 
-### `yarn build`
+```jsx
+const FilterableProductTable = ({ products }) => {
+    const [query, setQuery] = useState("");
+    const searchKey = Object.keys(products[0])[0];
+    return (
+        <div className="filtrable-product-table">
+            <SearchBar
+                callback={setQuery} />
+            <div className="header row">
+                {Object.keys(products[0]).map(x => <div> {x.toUpperCase()} </div>)}
+            </div>
+            <ProductTable
+                products={query
+                    ? products.filter(p => p[searchKey].includes(query)) 
+                    : products} />
+        </div>
+    )
+}
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Este componente recibe en props solo un array de productos.
+- Las props están deconstruidas `{ products }`
+- El componente es funcional pero usa el Hook `useState` para crear un estado "`query`" con su función set correspondiente.
+- En searchKey guardamos el nombre del campo que usaremos para filtrar los resultados.
+- El componente `SearchBar` recibe una función callback para poder usarla para modificar el valor de query con su input.
+- Dentro de un div con la clase header pintamos los nombres de todas las claves de uno de los objetos del array. Se podrían pintar los nombres "a mano" también.
+- El componente product table recibe un array de productos.
+    - Si query es undefined, null o cadena vacia, le pasamos el array products intacto.
+    - En cualquier otro caso pasamos un array products filtrado, donde el campo `searchKey` tiene que contener el `query`.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Componente SearchBar
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```jsx
+const SearchBar = ({ callback }) => {
 
-### `yarn eject`
+    const queryValue = useRef();
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+    const handleOnChange = () => {
+        callback(queryValue.current.value);
+    }
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    return (
+        <div className="search-bar">
+            <label htmlFor="query">
+                Filtrar:
+            </label>
+            <input
+                id="query"
+                ref={queryValue}
+                onChange={handleOnChange}
+            />
+        </div>
+    )
+}
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- El componente SearchBar utiliza un ref (creado con useRef) para almacenar el input que contiene en su render.
+- El componente contiene una función handleOnChange para gestionar el cambio del imput. Esta función simplemente utiliza la función callback recibida en props (los props están deconstruidos) pasando el valor actual del ref como parámetro.
+- En cuanto a renderizado, simplemente pinta un div con un label y un imput. El imput tiene asignados el ref y el onChange correspondientes.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Componente ProductTable
 
-## Learn More
+```jsx
+const ProductTable = ({ products }) => {
+    return (
+        <div>
+            {products.map(product => <Product key={product.name} data={product} />)}
+        </div>
+    )
+}
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Recibe un array de productos crea un componente Product para cada uno.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Componente Product
 
-### Code Splitting
+```jsx
+const Product = ({ data }) => {
+    return (
+        <div className="product row">
+            {Object.values(data).map(x => <div> {x} </div>)}
+        </div>
+    )
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- Recibe unos datos en forma de objeto. Convierte los valores del objeto en un array y pinta cada uno en un div.
 
-### Analyzing the Bundle Size
+### App.css
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```css
+.row {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr;
+}
 
-### Making a Progressive Web App
+.search-bar {
+  display: flex;
+  justify-content: space-between;
+  margin: auto;
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+.search-bar input {
+ width: 80%;
+ margin-left: 25px;
+}
 
-### Advanced Configuration
+.header {
+  border-bottom: 2px solid black;
+  padding-bottom: 5px;
+  margin-bottom:5px;
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+.filtrable-product-table {
+  margin: auto;
+  padding: 15px;
+  width: 800px;
+  border: 1px solid black;
+}
 
-### Deployment
+h1 {
+  text-align: center;
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Simplemente las clases necesarias para mostrar la aplicación como aparece en los ejemplos.
