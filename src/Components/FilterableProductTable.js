@@ -6,8 +6,8 @@ const SearchBar = ({ callback }) => {
 
     const handleOnChange = () => {
         callback(queryValue.current.value);
-
     }
+
     return (
         <div className="search-bar">
             <label htmlFor="query">
@@ -40,8 +40,7 @@ const ProductTable = ({ products }) => {
 
 const FilterableProductTable = ({ products }) => {
     const [query, setQuery] = useState("");
-    console.log(`Query: ${query}`)
-    console.log(`Filter: ${products.filter(p => p.name.includes(query))}`)
+    const searchKey = Object.keys(products[0])[0];
     return (
         <div className="filtrable-product-table">
             <SearchBar
@@ -50,7 +49,9 @@ const FilterableProductTable = ({ products }) => {
                 {Object.keys(products[0]).map(x => <div> {x.toUpperCase()} </div>)}
             </div>
             <ProductTable
-                products={query ? products.filter(p => p.name.includes(query)) : products} />
+                products={query
+                    ? products.filter(p => p[searchKey].includes(query)) 
+                    : products} />
         </div>
     )
 }
