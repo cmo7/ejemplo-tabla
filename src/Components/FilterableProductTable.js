@@ -33,10 +33,7 @@ const Product = ({ data }) => {
 const ProductTable = ({ products }) => {
     return (
         <div>
-            <div className="header row">
-                {Object.keys(products[0]).map(x => <div> {x.toUpperCase()} </div>)}
-            </div>
-        {products.map(product => <Product key={product.name} data={product} />)}
+            {products.map(product => <Product key={product.name} data={product} />)}
         </div>
     )
 }
@@ -46,9 +43,12 @@ const FilterableProductTable = ({ products }) => {
     console.log(`Query: ${query}`)
     console.log(`Filter: ${products.filter(p => p.name.includes(query))}`)
     return (
-        <div className = "filtrable-product-table">
+        <div className="filtrable-product-table">
             <SearchBar
                 callback={setQuery} />
+            <div className="header row">
+                {Object.keys(products[0]).map(x => <div> {x.toUpperCase()} </div>)}
+            </div>
             <ProductTable
                 products={query ? products.filter(p => p.name.includes(query)) : products} />
         </div>
